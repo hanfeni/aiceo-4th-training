@@ -1,0 +1,31 @@
+# ── 퍼블릭 노출 차단 ──────────────────────────────
+# 이 리포는 하네스 복사 가이드용 퍼블릭 리포다.
+# 공개 대상: README.md + .claude/{commands,skills,agents} + test-fixtures
+# 아래는 운영 산출물·작업 이력이라 퍼블릭에서 제외한다.
+
+# 하네스 실행 산출물 (실제 분석 결과 — 운영 데이터)
+specs/
+
+# 작업 이력 (타 프로젝트·디바이스 맥락 누출)
+.claude/history/
+
+# 로컬 설정·상태
+.claude/settings.local.md
+.claude/*.local.md
+*.local.md
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# 런타임·캐시
+node_modules/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
