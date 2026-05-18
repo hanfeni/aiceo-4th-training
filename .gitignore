@@ -14,6 +14,9 @@ specs/
 .claude/*.local.md
 *.local.md
 
+# 프로젝트 운영 컨텍스트 (vault 경로·강의 일정·수강생 맥락 — 퍼블릭 제외)
+CLAUDE.md
+
 # OS·에디터
 .DS_Store
 Thumbs.db
