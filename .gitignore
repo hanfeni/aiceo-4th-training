@@ -13,6 +13,7 @@ specs/
 .claude/settings.local.md
 .claude/*.local.md
 *.local.md
+.claude/scratchpad.md
 
 # 프로젝트 운영 컨텍스트 (vault 경로·강의 일정·수강생 맥락 — 퍼블릭 제외)
 CLAUDE.md
