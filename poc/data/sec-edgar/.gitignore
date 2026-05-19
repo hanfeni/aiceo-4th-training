@@ -1,0 +1,21 @@
+# SEC EDGAR 데이터 — 대용량·바이너리는 git 추적 제외
+# (SEC 데이터는 US 퍼블릭도메인이라 라이선스 제약은 없으나
+#  GitHub 파일당 100MB 하드리밋·리포 비대화 방지 목적)
+#
+# 추적 유지: collect_*.py / build_graph.py / build_subset.py
+#           _collect_meta.json (재현 절차·스키마·함정 문서)
+#           *_subset.csv (유명기관 64개 강의 배포 서브셋 31MB — 공개.
+#                          기존 5도메인처럼 search-lab raw fetch 자기완결)
+# 추적 제외: 원본 ZIP, 압축해제 TSV, 전체 가공물(221MB), 5-에이전트 임시 산출
+
+form13f_2025q3.zip
+13f/
+holdings.csv
+company_tickers.json
+top_issuers.csv
+managers.csv
+co_managers.csv
+tenk_risk.jsonl
+
+# 5-에이전트 병렬 수행 임시 디렉토리 (다른 에이전트 산출)
+_agent*/
