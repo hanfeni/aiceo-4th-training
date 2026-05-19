@@ -10,7 +10,7 @@
       "source_dataset": "SEC EDGAR Form 13F Data Sets, 2025 Q3 제출분 (제출일 01sep2025~30nov2025, 보고기준일 30-SEP-2025)",
       "source_url": "https://www.sec.gov/files/structureddata/data/form-13f-data-sets/01sep2025-30nov2025_form13f.zip",
       "downloaded_zip": "form13f_2025q3.zip (85,618,099 bytes / 약 86MB, 압축해제 343MB)",
-      "user_agent": "aiceo-4th-training-lecture dhkim@medicnc.co.kr (SEC 필수 헤더, 미설정 시 403)",
+      "user_agent": "aiceo-4th-training-lecture noreply@example.com (SEC 필수 헤더, 미설정 시 403)",
       "zip_contents_actual": "9 files — SUBMISSION/COVERPAGE/INFOTABLE/OTHERMANAGER/OTHERMANAGER2/SUMMARYPAGE/SIGNATURE .tsv + FORM13F_metadata.json + FORM13F_readme.htm",
       "row_counts_incl_header": {
         "SUBMISSION.tsv": 10423,
@@ -111,7 +111,7 @@
     }
   ],
   "trap_notes": [
-    "함정1 (SEC User-Agent 필수): SEC.gov 모든 요청에 -A 'aiceo-4th-training-lecture dhkim@medicnc.co.kr' 헤더 미설정 시 403/봇차단. ZIP·submissions JSON·10-K HTML 전부 해당. company_tickers.json 만 무인증 통과되나 동일 헤더 사용.",
+    "함정1 (SEC User-Agent 필수): SEC.gov 모든 요청에 -A 'aiceo-4th-training-lecture noreply@example.com' 헤더 미설정 시 403/봇차단. ZIP·submissions JSON·10-K HTML 전부 해당. company_tickers.json 만 무인증 통과되나 동일 헤더 사용.",
     "함정2 (ZIP 내부 OTHERMANAGER2): 스펙은 6 TSV 명시했으나 실제 ZIP 에 OTHERMANAGER2.tsv(3,760행)가 추가로 존재(총 9파일). 추정 파일명 금지 원칙대로 zipfile.namelist() 실측으로 확인. 그래프 가공에는 OTHERMANAGER.tsv 만 사용(스펙 준수), OTHERMANAGER2 는 보존만.",
     "함정3 (CUSIP→CIK 직접매핑 불가): 13F INFOTABLE 은 CUSIP 만 제공, SEC 공개 무료 소스에 CUSIP↔CIK 매핑표 없음(상용 DB 필요). 우회: 13F NAMEOFISSUER('MICROSOFT CORP COM')를 접미어 정규식(COM/CL A/CORP/INC...)으로 정규화 후 company_tickers.json title 과 이름매칭. 단일토큰 브랜드(MICROSOFT/NVIDIA)는 prefix 매칭, 정규화 한계분(ELI LILLY/DISNEY/BERKSHIRE/EXXON/COSTCO/MCDONALDS)은 수동 ticker 별칭 7건. 진성 매칭실패 1/47 (GE AEROSPACE COM NEW — 'GE' 정규화 후 title 불일치). 강의 시연엔 영향 없음(상위 46개 확보).",
     "함정4 (10-K iXBRL 인라인 단어분절): 최신 10-K 는 iXBRL 인라인 형식이라 평문화 시 헤딩이 'ITEM 1A. RIS K FACTORS'처럼 단어 중간에 공백이 끼고 &#160;(nbsp) 엔티티가 섞임. (a) html.unescape 적용, (b) 헤딩 토큰을 글자-사이-공백 허용 정규식(_loose)으로, (c) 목차(TOC)/교차참조 문장 vs 본문을 점수화(다음 종료헤딩까지 거리 최대 + 교차참조 감점)해 본문 시작 선택. 초기 단순 regex 는 MSFT/Exxon/Costco 등 'risk-too-short(2)' 로 실패 → 수정 후 복구.",

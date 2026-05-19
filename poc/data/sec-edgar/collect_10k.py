@@ -18,7 +18,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 KST = timezone(timedelta(hours=9))
-UA = "aiceo-4th-training-lecture dhkim@medicnc.co.kr"
+UA = "aiceo-4th-training-lecture noreply@example.com"
 HERE = Path(__file__).parent
 TOP_N = 55                       # 상위 55개 시도 (ETF 4~6개는 10-K 없음)
 OUT = HERE / "tenk_risk.jsonl"

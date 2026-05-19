@@ -26,7 +26,7 @@ import urllib.request
 csv.field_size_limit(1 << 24)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-UA = "aiceo-4th-training-lecture dhkim@medicnc.co.kr"
+UA = "aiceo-4th-training-lecture noreply@example.com"
 TOP_N = int(sys.argv[1]) if len(sys.argv) > 1 else 30
 
 # 13F 발행사명 접미사 — 정규화 시 제거

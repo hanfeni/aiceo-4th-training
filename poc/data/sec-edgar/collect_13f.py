@@ -15,7 +15,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-UA = "aiceo-4th-training-lecture dhkim@medicnc.co.kr"
+UA = "aiceo-4th-training-lecture noreply@example.com"
 ZIP_URL = (
     "https://www.sec.gov/files/structureddata/data/form-13f-data-sets/"
     "01sep2025-30nov2025_form13f.zip"
