@@ -1,0 +1,103 @@
+{
+  "collection": "AI CEO 4기 실습용 정책/거버넌스 도메인 샘플 데이터",
+  "collected_at_kst": "2026-05-19T10:05:49.902677+09:00",
+  "lecture_date": "2026-05-22",
+  "method": "실제 curl 수집 (추측·시뮬레이션 없음)",
+  "structured_budget": {
+    "file": "budget.csv",
+    "rows": 1640,
+    "columns": [
+      "source_dataset_id",
+      "institution",
+      "sector",
+      "fiscal_year",
+      "budget_amount_krw",
+      "expenditure_amount_krw",
+      "unit",
+      "source_org"
+    ],
+    "source": "공공데이터포털 data.go.kr 무인증 fileData CSV (3단계 다운로드: fileData.do 세션 → /tcs/dss/selectFileDataDownload.do → /cmm/cmm/fileDownload.do)",
+    "datasets_combined": 14,
+    "dataset_ids": {
+      "15042430": "경기도 하남시_세입세출예산 운영 현황",
+      "15062963": "경상북도 영주시_재정정보시스템_세출정보(부서x분야 집계)",
+      "15063594": "전북특별자치도 장수군_세입세출예산운영현황",
+      "15065033": "한국재정정보원_분야별 재원배분(총지출)",
+      "15065173": "한국재정정보원_분야별 집행률 추이",
+      "15075214": "대전광역시 서구_기능별 세출 예산",
+      "15095169": "대전광역시 서구_성질별 세출예산",
+      "15095171": "대전광역시 서구_조직별 세출예산",
+      "15117568": "한국재정정보원_분야별 조세지출 현황",
+      "15124927": "제주특별자치도 서귀포시_일반회계 세출결산",
+      "15132492": "인천광역시 연수구_세출예산 정보",
+      "15135701": "충청북도_세출_예산결산",
+      "15136057": "충청북도_주민1인당_세출예산액",
+      "15138147": "경기도 용인시_홈페이지 세입세출 예산현황"
+    },
+    "distinct_source_org": 9,
+    "source_org_breakdown": {
+      "경기도 하남시": 13,
+      "전북특별자치도 장수군": 26,
+      "한국재정정보원": 360,
+      "대전광역시 서구": 178,
+      "인천광역시 연수구": 273,
+      "충청북도": 65,
+      "경기도 용인시": 14,
+      "제주특별자치도 서귀포시": 84,
+      "경상북도 영주시": 627
+    },
+    "fiscal_year_range": "2012~2026",
+    "encoding_note": "원본 대부분 EUC-KR/CP949, 일부 UTF-8-SIG → iconv/codec 정규화 후 UTF-8 저장",
+    "schema_note": "기관(institution) → 분야(sector) → 금액(예산/지출) 위계. wide-format 데이터셋(서귀포시·재정정보원 재원배분/조세지출)은 분야 컬럼을 long으로 unpivot. 단위(unit) 컬럼 보존 — KRW/천원/백만원/억원/조원 혼재(원본 단위 그대로, 미환산)",
+    "license": "공공데이터포털 이용허락범위 제한없음(useScopeCode COEX07) / 공공누리 1유형 — 출처표시 시 자유이용"
+  },
+  "search_documents_press_release": {
+    "file": "press_release.jsonl",
+    "docs": 943,
+    "fields": [
+      "doc_id",
+      "title",
+      "ministry",
+      "body",
+      "url",
+      "collected_at",
+      "char_count"
+    ],
+    "source": "대한민국 정책브리핑 korea.kr 부처별 RSS 보도자료 31개 피드 + 통합 pressrelease.xml",
+    "body_extraction_path": "RSS <description> CDATA (전체 본문 HTML 임베드) — 검증된 경로",
+    "hwp_iframe_trap_avoidance": "pressReleaseView.do 페이지는 HWP-iframe 함정(본문 iframe 외부, 약 550자 전재안내 보일러플레이트만 추출) → 폐기. RSS CDATA에 완전 본문이 들어있어 이를 사용. 최단 본문 803자로 40자 함정 회피 확인",
+    "filters": "char_count >= 800, newsId 기준 중복제거, 사진캡션 (...ⓒ...) 제거, korea.kr 푸터 보일러플레이트(자료제공/정책주간지 바로가기) 제거",
+    "char_count": {
+      "min": 803,
+      "max": 10666,
+      "mean": 1646,
+      "median": 1403
+    },
+    "distinct_ministries": 48,
+    "ministry_breakdown_top15": {
+      "중소벤처기업부": 47,
+      "특허청": 46,
+      "소방청": 46,
+      "국민권익위원회": 45,
+      "농림축산식품부": 44,
+      "금융위원회": 43,
+      "공정거래위원회": 43,
+      "보건복지부": 43,
+      "농촌진흥청": 43,
+      "환경부": 42,
+      "여성가족부": 41,
+      "산업통상부": 41,
+      "행정안전부": 40,
+      "기상청": 38,
+      "관세청": 36
+    },
+    "target_80_achieved": true,
+    "target_300_achieved": true,
+    "license": "공공누리 1유형 (텍스트만 수집, 이미지/사진 제외)"
+  },
+  "shortfalls_honest": [
+    "budget.csv: 원본 데이터셋별 금액 단위가 KRW/천원/백만원/억원/조원으로 상이 → 단일 통화액 미환산. unit 컬럼으로 구분 보존(실습 시 단위 주의 필요).",
+    "data.go.kr 검색 pageIndex 파라미터가 페이징되지 않아 키워드 다양화로 후보 풀 확보(27개 후보 중 18개 CSV 다운로드 성공, 14개가 기관-분야 위계로 정규화 가능). 나머지는 ZIP/스키마 부적합/no-uddi로 제외.",
+    "press_release: korea.kr 부처별 RSS는 피드당 최신 50건 캡 → 31개 부처 피드 결합으로 1,550개 풀에서 ≥800자·중복제거 후 943건. 과거 아카이브 전체는 RSS로 미수집(페이지 크롤은 HWP-iframe 함정으로 불가)."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "collection_purpose": "서울대 AI CEO 4기 강의(2026-05-22) 실습용 상권/소상공인 도메인 샘플 데이터",
+  "collected_at_kst": "2026-05-19 09:13 KST (UTC+9)",
+  "collector": "Claude Code agent, 실제 curl 다운로드 (시뮬레이션 아님)",
+  "datasets": [
+    {
+      "name": "stores_sample.csv",
+      "type": "구조화 데이터 (상가/상권정보)",
+      "source_dataset": "소상공인시장진흥공단_상가(상권)정보",
+      "data_go_kr_page": "https://www.data.go.kr/data/15083033/fileData.do",
+      "download_method": "data.go.kr 2단계 다운로드",
+      "step1_prep_url": "https://www.data.go.kr/tcs/dss/selectFileDataDownload.do?publicDataPk=15083033&publicDataDetailPk=uddi:6a450671-390c-4b6d-979c-fa056a627084",
+      "step1_result": "JSON 최상위 키 atchFileId=FILE_000000003632420, status=true, fileDetailSn=1 (atchFileId는 dataSetFileDetailInfo 내부가 아닌 응답 root 레벨에 존재)",
+      "step2_file_url": "https://www.data.go.kr/cmm/cmm/fileDownload.do?atchFileId=FILE_000000003632420&fileDetailSn=1&insertDataPrcus=N",
+      "downloaded_zip": "sangga.zip (341,021,001 bytes / 약 341MB, 검증값과 일치)",
+      "zip_contents": "17개 시도 CSV + 안내문 1개 = 18 files (파일명 EUC-KR 인코딩)",
+      "data_period": "202603 (2026년 3월 기준, 데이터셋명 _20260331)",
+      "selected_region": "세종특별자치시 (ZIP 내 최소 시도 CSV, 9,651,297 bytes)",
+      "sejong_full_rows": 15423,
+      "sejong_full_lines_incl_header": 15424,
+      "sample_extraction": "세종 CSV 헤더 + 선두 데이터 10,000행 추출 (목표 약 1만 행 충족)",
+      "sample_rows_data": 10000,
+      "sample_lines_incl_header": 10001,
+      "sample_bytes": 5619428,
+      "columns": 39,
+      "encoding": "UTF-8 (이번 202603 분기 파일은 BOM 없음, 검증노트의 'UTF-8 BOM'과 상이하나 utf-8-sig로 안전 처리)",
+      "column_names": ["상가업소번호","상호명","지점명","상권업종대분류코드","상권업종대분류명","상권업종중분류코드","상권업종중분류명","상권업종소분류코드","상권업종소분류명","표준산업분류코드","표준산업분류명","시도코드","시도명","시군구코드","시군구명","행정동코드","행정동명","법정동코드","법정동명","지번코드","대지구분코드","대지구분명","지번본번지","지번부번지","지번주소","도로명코드","도로명","건물본번지","건물부번지","건물관리번호","건물명","도로명주소","구우편번호","신우편번호","동정보","층정보","호정보","경도","위도"],
+      "license": "이용허락범위 제한 없음 (data.go.kr 공공데이터)"
+    },
+    {
+      "name": "policy_news.jsonl",
+      "type": "검색 문서 (정책뉴스 소상공인 서브셋)",
+      "source": "대한민국 정책브리핑 (korea.kr) 정책뉴스",
+      "seed_discovery": "https://www.korea.kr/rss/policy.xml (policyNewsView 링크 50건) + https://www.korea.kr/rss/dept_mss.xml (중기부, newsId 시드만 사용)",
+      "body_url_pattern": "https://www.korea.kr/news/policyNewsView.do?newsId=<NNN>",
+      "extraction": "article_body div 평문 추출, 사진캡션 정규식 \\([^)]*ⓒ[^)]*\\) 제거, 'K-공감 바로가기' 푸터 제거",
+      "filter": "char_count >= 800 (카드뉴스/브리핑요약형 제외) + 소상공인 도메인 키워드 매칭(소상공인/자영업/전통시장/상권/창업/벤처/중소기업/스타트업 등)",
+      "collection_strategy": "policy RSS 시드 newsId 대역(148964205~148964548)에서 역순 순차 스캔, 16-thread 병렬 curl",
+      "newsId_range_collected": "148961209 - 148964545",
+      "total_docs": 300,
+      "target": 300,
+      "hard_min": 80,
+      "hard_min_met": true,
+      "char_count_min": 813,
+      "char_count_median": 1730,
+      "char_count_max": 7807,
+      "char_count_avg": 2027,
+      "duplicates": "doc_id 300/300 unique, title 300/300 unique",
+      "jsonl_bytes": 1515642,
+      "schema": "{doc_id, title, body, url, collected_at, char_count}",
+      "license": "공공누리 제1유형 (출처표시) — 텍스트만 수집, 이미지 제외"
+    }
+  ],
+  "trap_notes": [
+    "함정1 (pressReleaseView): 중기부 RSS(dept_mss.xml)의 link는 pressReleaseView.do(보도자료, newsId 156762xxx 대역)로 본문이 HWP-iframe에 갇혀 40자만 노출됨. 절대 사용 안 함. 본문은 100% policyNewsView.do(정책뉴스, newsId 148964xxx 대역) 경로로만 수집. 검증: policy_news.jsonl 내 pressReleaseView URL 0건.",
+    "함정2 (uddi/atchFileId 위치): step1 selectFileDataDownload.do 응답에서 dataSetFileDetailInfo.success=false, dataSetFileDetailInfo.atchFileId=null 이라 만료로 오인하기 쉬우나, 실제 atchFileId는 JSON 응답 ROOT 레벨 키(status=true, atchFileId=FILE_000000003632420)에 존재. 명시된 uddi:6a450671-...는 만료되지 않았고 그대로 유효(데이터셋 HTML fn_fileDataDown 인자로 재확인).",
+    "함정3 (UTF-8 BOM): 검증노트는 '39컬럼 UTF-8 BOM'이라 했으나 202603 분기 세종 CSV는 BOM 없는 UTF-8. 첫 바이트가 0x22(\")로 시작. csv를 utf-8-sig로 읽어 BOM 유무 무관하게 안전 처리.",
+    "함정4 (ZIP 파일명 인코딩): ZIP 내부 파일명이 EUC-KR(cp949)로 저장되어 unzip -l 시 깨짐. Python zipfile에서 filename.encode('cp437').decode('euc-kr')로 디코딩해 세종 CSV 정확 식별."
+  ],
+  "artifacts_kept": {
+    "sangga.zip": "원본 341MB ZIP (17개 시도 전체, 재추출용 보존)",
+    "sejong_full.csv": "세종 전체 15,423행 (샘플 원본)",
+    "stores_sample.csv": "최종 샘플 1만 행",
+    "policy_news.jsonl": "최종 정책뉴스 300건",
+    "rss_policy.xml / rss_mss.xml": "수집 시드 RSS 원본",
+    "collect_policy.py / collect_policy_par.py": "수집 스크립트 (재현용)"
+  }
+}

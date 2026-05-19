@@ -29,3 +29,28 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# ── PoC 산출물 차단 ───────────────────────────────────
+# 2026-05-19 결정 (사용자): poc/data 검색문서·CSV는 PUBLIC 공개로
+# 전환 — aiceo-4th-agent 가 raw URL 로 fetch 색인하기 위함.
+# ⚠️ 이는 6차 검증·architect "제3자 저작권 본문 차단" 결정의 명시적
+# 반전이다. 의약품 허가상세·법령·정책뉴스 본문이 public GitHub 에
+# 영구 노출되며 라이선스 책임은 리포 소유자에 귀속(삭제해도
+# GitHub 캐시·포크 잔존). 상세 경위: vault data-connection-samples.
+#
+# 단 대용량 빌드 산출물(인덱스·clone·venv·캐시)은 계속 차단:
+poc/output/
+poc/**/output/
+poc/**/.cache/
+poc/**/corpus/
+# 인덱스·벡터스토어 (원문 청크 평문 역추출 가능)
+*.faiss
+*.index
+poc/**/index/
+poc/**/*.bm25
+# legalize-kr / precedent-kr clone (2.7G, force-push 해시 변동)
+poc/**/legalize-kr/
+poc/**/precedent-kr/
+# Python venv (run_poc.sh 생성)
+poc/.venv/
+.venv/

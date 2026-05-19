@@ -1,0 +1,109 @@
+{
+  "collected_at": "2026-05-19T09:50+09:00 KST",
+  "purpose": "서울대 AI CEO 4기 강의(2026-05-22) 실습용 법률 도메인 샘플 데이터",
+  "tracks": {
+    "structured_sql_graph": {
+      "file": "law_list.csv",
+      "source": "강사 보유 CSV (~/Downloads/법령검색목록.csv)",
+      "source_encoding": "UTF-8 with BOM (EUC-KR 아님 — file 명령으로 확정)",
+      "transform": "BOM 제거 + 1행 메타행('총5425건') 제거 → UTF-8(no BOM)",
+      "rows": 5425,
+      "columns": "순번,법령MST,소관부처코드,소관부처명,법령ID,법령명,공포일자,공포번호,시행일자,법령구분코드,법령구분명,법령분야코드,법령분야명",
+      "main_reason": "5,425건으로 가장 작아 강의 실습에 다루기 좋음",
+      "reference_files": {
+        "law_list_full_1.csv": "법령검색목록 (1).csv 가공 (40,000건, 참조용)",
+        "law_list_full_2.csv": "법령검색목록 (2).csv 가공 (40,000건, 참조용)"
+      }
+    },
+    "search_corpus": {
+      "file": "law_corpus.jsonl",
+      "source_repo": "https://github.com/legalize-kr/legalize-kr",
+      "commit_hash": "7dff641f6df407dca2e67782deca25837566ff20",
+      "commit_date": "2026-05-15 12:00:00 +0900",
+      "clone_cmd": "git clone --depth 1 https://github.com/legalize-kr/legalize-kr",
+      "clone_metrics": "332M, .md 5,671개, 약 33초 (vault 6차 검증 실측 재현 일치)",
+      "license": "법령 원문=공공저작물(자유), 구조=MIT — 재배포·강의 자유",
+      "sampling": "소관부처별 라운드로빈 (82개 부처 균등 분산), seed=20260522 고정",
+      "schema": [
+        "doc_id",
+        "law_mst",
+        "title",
+        "ministry",
+        "promulgation_date",
+        "body",
+        "char_count"
+      ],
+      "count": 449,
+      "avg_char_count": 18936.2,
+      "min_char_count": 112,
+      "max_char_count": 258554,
+      "ministry_diversity": 82,
+      "ministry_top": {
+        "국토교통부": 8,
+        "행정안전부": 8,
+        "법무부": 8,
+        "해양수산부": 8,
+        "보건복지부": 8,
+        "기후에너지환경부": 8,
+        "국방부": 8,
+        "교육부": 8,
+        "농림축산식품부": 8,
+        "재정경제부": 8,
+        "문화체육관광부": 8,
+        "산업통상부": 8,
+        "법원행정처": 8,
+        "과학기술정보통신부": 8,
+        "고용노동부": 8
+      }
+    },
+    "graph_precedent": {
+      "file": "precedent_refs.jsonl",
+      "source_repo": "https://github.com/legalize-kr/precedent-kr",
+      "commit_hash": "9f59c1cf53cbc2251dfc50c019033c49ba78651e",
+      "commit_date": "2026-02-12 12:00:00 +0900",
+      "clone_cmd": "git clone --depth 1 --filter=blob:none --sparse → sparse-checkout '민사'",
+      "clone_metrics": "sparse(blob:none) 19M → 민사 checkout 후 781M (/tmp, poc/ 미포함)",
+      "scope": "민사/대법원 판례 중 참조조문 또는 참조판례 보유분만",
+      "count": 50,
+      "pool": 28518,
+      "schema": [
+        "prec_id",
+        "case_no",
+        "case_name",
+        "court",
+        "decided_date",
+        "case_type",
+        "ref_statutes_raw",
+        "ref_statutes",
+        "ref_precedents_raw"
+      ],
+      "graph_use": "판례→법령조문(ref_statutes), 판례→판례(ref_precedents_raw) 엣지"
+    }
+  },
+  "files": {
+    "law_list.csv": {
+      "rows": 5425,
+      "sha256_16": "28b84058d992bace"
+    },
+    "law_corpus.jsonl": {
+      "lines": 449,
+      "sha256_16": "7c50ec29773f493f"
+    },
+    "precedent_refs.jsonl": {
+      "lines": 50,
+      "sha256_16": "afcf4ebe71fff568"
+    },
+    "law_list_full_1.csv": {
+      "rows": 40000
+    },
+    "law_list_full_2.csv": {
+      "rows": 40000
+    }
+  },
+  "notes": [
+    "강사 CSV 실제 인코딩은 UTF-8 with BOM (지시문의 EUC-KR 추정과 달랐음 — file 명령으로 확정 후 BOM 처리)",
+    "precedent-kr는 선택 항목이었으나 sparse-checkout으로 성공 수집 (50건)",
+    "임시 clone은 /tmp 사용, poc/ 디렉토리에 대용량 미포함",
+    "force-push 대비 양 repo 커밋 해시 고정 기록"
+  ]
+}
