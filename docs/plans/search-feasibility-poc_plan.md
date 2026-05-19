@@ -1,9 +1,22 @@
 # 구현 계획: 검색 문서 Feasibility PoC
 
+> ⚠️ **2026-05-19 — 이 슬라이스/TDD 실행 계획은 폐기(SUPERSEDED).**
+> 사용자 결정: 이 강의는 수강생이 코드를 직접 짜는 게 아니라
+> **"코딩에이전트에게 시키는" 패러다임**이다. 따라서 산출물은
+> `poc/*.py` 실행 코드·S0~S5 슬라이스·TDD가 아니라 **코딩에이전트에
+> 복붙하는 완성 프롬프트 3종**(bootstrap/ 형식)이다.
+> 폐기 대상은 §2 슬라이스 분해·TDD·1슬라이스=1커밋·실행 코드 계획.
+> 보존 대상(프롬프트 설계 근거로 격하)은 §1 불변식(architect
+> AI1~AI8), PRD §1의 6차 데이터 검증·라이선스·함정·차원 락인
+> 리스크 — 이것들은 "프롬프트에 박을 가드레일"의 출처로 살아있다.
+> 강의 노출 산출물은 `bootstrap/` 옆 3단계 프롬프트뿐이며, 아래
+> 원문은 프롬프트가 명령해야 할 제약의 근거로만 참조한다.
+
 > Based on `docs/PRD.md` §1 v1.0 / `docs/use-cases/search-feasibility-poc_use_cases.md` UC-1~10 / `docs/qa/search-feasibility-poc_test_cases.md` 67 TC.
 > Architect: **PASS** (1회 재제출) + AI1~AI4 STRUCTURAL + 보안 사전리뷰 슬라이스 삽입 명령.
+> (인덱싱 스택 OpenSearch 재정의로 AI5~AI8 + S3 3분할 추가됨 — PRD v1.1 참조)
 > 작성: 2026-05-18 KST / D-4 (강의 2026-05-22).
-> 브랜치: `feat/search-feasibility-poc`, 1슬라이스=1커밋.
+> 브랜치: `feat/search-feasibility-poc`.
 
 ## 1. 불변식 (모든 슬라이스 준수 — architect AI1~AI4)
 

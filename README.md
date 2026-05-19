@@ -317,3 +317,82 @@ raw.githubusercontent.com/hanfeni/aiceo-4th-training/main/<경로>
   "원문을 변형 없이 그대로 받아 설치"라고 명시한다.
 - 설치 후 `grep "^## "` 섹션 수 + (법무는) 디스클레이머
   문구 존재를 기계 확인한 뒤에만 완료로 본다.
+
+---
+
+## 11. 2회차 실습 — 검색 문서 Feasibility PoC
+
+> §1~10은 **1회차(5/15) 사후 보강** 배포물(부트스트랩·7커맨드).
+> 아래는 **2회차(5/22) "제작"** 실습 자산이다. 주제가 달라
+> 별도 섹션으로 분리한다.
+
+### 11-1. 무엇인가
+
+5개 도메인 각각에 **검색3종(BM25·임베딩·하이브리드) + SQL + 그래프**
+실습이 실제로 성립하는지 검증하는 PoC. 데이터셋 선정은
+5-에이전트 병렬 조사 6차(라이선스·무인증접근·실 curl 다운로드·
+본문품질)로 확정했다.
+
+- 문서: [docs/PRD.md](docs/PRD.md) ·
+  [docs/use-cases](docs/use-cases/search-feasibility-poc_use_cases.md) ·
+  [docs/qa](docs/qa/search-feasibility-poc_test_cases.md) ·
+  [docs/plans](docs/plans/search-feasibility-poc_plan.md)
+- 정답지(ground truth) 없이 진행 → **정량(nDCG) 아닌 정성 feasibility**.
+
+### 11-2. 5개 도메인 (구조화 데이터 + 검색 문서 짝)
+
+| 도메인 | 구조화(SQL/그래프) | 검색 문서(임베딩) | 출처 |
+|---|---|---|---|
+| 상권 | 상가(상권)정보 | 정책뉴스 소상공인 | data.go.kr / korea.kr |
+| 의료 | 약가마스터 | 의약품안전나라 허가상세 | data.go.kr / nedrug |
+| 금융 | 국민연금 사업장 | 정책뉴스 고용·금융 | data.go.kr / korea.kr |
+| 법률 | 법령 메타 CSV | legalize-kr 법령 본문 + 판례참조 | 법제처 CSV / GitHub |
+| 정책 | 세출예산(다기관 결합) | 정책브리핑 보도자료 | data.go.kr / korea.kr |
+
+> ⚠️ 함정: korea.kr `pressReleaseView`는 본문이 HWP-iframe에
+> 갇혀 40자만 추출됨(검증됨). **`policyNewsView` 또는 RSS
+> CDATA 경로**를 써야 한다.
+
+### 11-3. ⚠️ 실데이터는 리포에 없다 (재현으로 확보)
+
+수집한 실데이터(상가·약가·국민연금 CSV, 법령·의약품·정책뉴스
+본문)는 **제3자 저작권 본문 + 공개 리포라 `.gitignore`로 전량
+제외**된다 (`poc/data/`, `*.jsonl`, 인덱스, legalize-kr clone).
+
+```text
+poc/data/<domain>/   ← git 추적 안 됨. 강사 로컬에만 존재.
+  ├─ <구조화>.csv     (상가/약가/국민연금/법령메타/세출예산)
+  ├─ <검색문서>.jsonl ({doc_id,title,body,url,char_count})
+  └─ _collect_meta.json (출처·건수·라이선스·함정노트)
+```
+
+- 강의 노트북이 다른 기기면 **재수집 또는 별도 복사** 필요
+  (git clone으로는 데이터가 안 따라온다 — 의도된 안전장치).
+- 재현: vault 데이터 노트 §6차의 수집 URL/방식을 그대로 사용.
+  data.go.kr은 2단계 다운로드(준비 JSON→atchFileId→fileDownload).
+- 라이선스: 공공누리 1유형/제한없음/공공저작물·MIT(legalize-kr).
+  정책 텍스트만 — 이미지·사진은 제3자 권리라 제외.
+
+### 11-4. 실습 산출물 — 코딩에이전트 프롬프트 3종
+
+> 이 강의는 수강생이 코드를 직접 짜지 않는다. **1회차
+> `bootstrap/`와 같은 방식** — 코딩에이전트에 프롬프트를
+> 복붙하면 에이전트가 수행한다.
+
+`round2-prompts/` 에 3단계 완성 프롬프트:
+
+| 파일 | 시킬 일 |
+|---|---|
+| `03-메타스키마발굴-프롬프트.md` | LLM 샘플링 수렴으로 도메인 메타 스키마 발굴 |
+| `02-LLM메타라벨링-프롬프트.md` | 검색 문서에 LLM 메타 부착 (사내 1단계 분류 패턴) |
+| `01-검색인덱싱-프롬프트.md` | OpenSearch+Nori+OpenAI 하이브리드 검색 구축 |
+
+- 복붙 순서·트랙(풀코스/빠른체험/메타만)·도메인 선택은
+  [round2-prompts/README.md](round2-prompts/README.md) 참조.
+- 각 프롬프트 `## 0. 절대 규칙`에 6차 검증·architect AI1~AI8
+  가드레일이 박혀 있다(데이터 재수집 금지·knn 차원 락인·
+  `pressReleaseView` 함정 회피·문서 단위 메타 등).
+- `docs/`(PRD·use-cases·QA·plan)는 **프롬프트 설계 근거**로
+  보존. plan의 슬라이스/TDD/실행코드 계획은 폐기(이 강의는
+  실행 코드가 아니라 프롬프트가 산출물).
+- ⚠️ blob→raw URL 함정은 §10-C와 동일하게 적용된다.
