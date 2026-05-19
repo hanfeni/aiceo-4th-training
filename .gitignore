@@ -58,3 +58,6 @@ poc/**/precedent-kr/
 # Python venv (run_poc.sh 생성)
 poc/.venv/
 .venv/
+
+# sec-edgar 대용량/임시 산출 차단은 poc/data/sec-edgar/.gitignore 에서
+# 관리 (원본 ZIP·343MB TSV·388MB holdings·_agent*/ 워크스페이스).

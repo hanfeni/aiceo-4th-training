@@ -1,0 +1,147 @@
+{
+  "collection_purpose": "서울대 AI CEO 4기 강의(2026-05-22) 실습용 SEC EDGAR 지식그래프 도메인 — GraphRAG(기관 공동보유 멀티홉) vs RAG(10-K 리스크 텍스트) 대조 시연 데이터",
+  "collected_at_kst": "2026-05-19 22:17 KST (UTC+9)",
+  "collector": "Claude Code agent #2 (5-에이전트 병렬, 동일업무 독립수행). 실제 curl/스크립트 실행 — 시뮬레이션 아님",
+  "license": "SEC EDGAR 데이터는 미국 정부 퍼블릭 도메인 (US Public Domain). 13F Form Data Sets·company_tickers.json·10-K 모두 무제한 재배포 가능. SEC.gov 요청은 User-Agent 헤더 필수",
+  "datasets": [
+    {
+      "name": "13f/ (TSV 7종 + metadata.json + readme.htm)",
+      "type": "구조화 데이터 (13F 기관보유 — 그래프 엣지 원천)",
+      "source_dataset": "SEC EDGAR Form 13F Data Sets, 2025 Q3 제출분 (제출일 01sep2025~30nov2025, 보고기준일 30-SEP-2025)",
+      "source_url": "https://www.sec.gov/files/structureddata/data/form-13f-data-sets/01sep2025-30nov2025_form13f.zip",
+      "downloaded_zip": "form13f_2025q3.zip (85,618,099 bytes / 약 86MB, 압축해제 343MB)",
+      "user_agent": "aiceo-4th-training-lecture noreply@example.com (SEC 필수 헤더, 미설정 시 403)",
+      "zip_contents_actual": "9 files — SUBMISSION/COVERPAGE/INFOTABLE/OTHERMANAGER/OTHERMANAGER2/SUMMARYPAGE/SIGNATURE .tsv + FORM13F_metadata.json + FORM13F_readme.htm",
+      "row_counts_incl_header": {
+        "SUBMISSION.tsv": 10423,
+        "COVERPAGE.tsv": 10423,
+        "SIGNATURE.tsv": 10423,
+        "SUMMARYPAGE.tsv": 8692,
+        "INFOTABLE.tsv": 3267092,
+        "OTHERMANAGER.tsv": 4359,
+        "OTHERMANAGER2.tsv": 3760
+      },
+      "tsv_schema": {
+        "SUBMISSION": "ACCESSION_NUMBER(PK), FILING_DATE(DD-MON-YYYY), SUBMISSIONTYPE(13F-HR/13F-NT/amendment), CIK(filer CIK 10자리), PERIODOFREPORT(보고분기 말일)",
+        "COVERPAGE": "ACCESSION_NUMBER, FILINGMANAGER_NAME(기관명), FILINGMANAGER_STREET1/2/CITY/STATEORCOUNTRY/ZIPCODE(주소), CRDNUMBER/SECFILENUMBER(식별번호), ISAMENDMENT 등 21컬럼",
+        "INFOTABLE": "ACCESSION_NUMBER, INFOTABLE_SK, NAMEOFISSUER(발행사명), TITLEOFCLASS, CUSIP(증권식별 9자리), FIGI, VALUE(보유가치, 단위=USD 1,000), SSHPRNAMT(주식수/원금), SSHPRNAMTTYPE(SH/PRN), PUTCALL, INVESTMENTDISCRETION, OTHERMANAGER, VOTING_AUTH_SOLE/SHARED/NONE — 한 행 = (기관 1)→(종목 1) 보유 엣지",
+        "OTHERMANAGER": "ACCESSION_NUMBER, OTHERMANAGER_SK, CIK(공동운용 기관 CIK), FORM13FFILENUMBER, CRDNUMBER, SECFILENUMBER, NAME(공동운용 기관명) — 같은 filing에 보고된 다른 운용사",
+        "SUMMARYPAGE": "ACCESSION_NUMBER, OTHERINCLUDEDMANAGERSCOUNT, TABLEENTRYTOTAL(보유종목 수), TABLEVALUETOTAL(총 보유가치), ISCONFIDENTIALOMITTED",
+        "SIGNATURE": "서명자/직책/날짜 (그래프에 미사용, 보존)"
+      },
+      "value_unit_note": "2023-01-03 이후 13F는 VALUE 단위가 USD 1,000 (그 이전은 절사 후 1,000 곱). 본 데이터(2025Q3)는 1,000 단위 그대로 사용"
+    },
+    {
+      "name": "company_tickers.json",
+      "type": "보조 매핑 (티커-CIK)",
+      "source_url": "https://www.sec.gov/files/company_tickers.json (무인증, UA 권장)",
+      "entries": 10354,
+      "schema": "{idx: {cik_str, ticker, title}} — CUSIP 미포함. CUSIP→CIK 직접 매핑은 SEC 공개 무료 소스에 없음(상용 DB 필요)",
+      "bytes": 791457
+    },
+    {
+      "name": "managers.csv / holdings.csv / co_managers.csv / top_issuers.csv",
+      "type": "GraphRAG 정규화 가공물 (build_graph.py 산출, 13F TSV 파싱)",
+      "generator": "build_graph.py (재현 가능, 결정적)",
+      "managers_csv": {
+        "purpose": "기관(filer) 노드. SUBMISSION+COVERPAGE 조인",
+        "schema": "accession_number, cik, manager_name, city, state_or_country, zipcode, filing_date, submission_type, period_of_report",
+        "rows_data": 10422,
+        "distinct_cik": 9859,
+        "sample_rows": [
+          "0001991340-25-000003,0001991340,Strategic Advocates LLC,LOGAN,UT,84321,26-NOV-2025,13F-HR,30-SEP-2025",
+          "0001172661-25-005225,0001950218,\"Lantern Wealth Advisors, LLC\",MELVILLE,NY,11747,26-NOV-2025,13F-HR,30-SEP-2025"
+        ]
+      },
+      "holdings_csv": {
+        "purpose": "(기관)-[OWNS]->(종목) 엣지. INFOTABLE 전체 보존",
+        "schema": "accession_number, cusip, name_of_issuer, value_usd_thousands, shares, shares_type, put_call",
+        "rows_data": 3267091,
+        "bytes": 221622236,
+        "sample_rows": [
+          "0001991340-25-000003,34959E109,FORTINET INC COM,12023,143,SH,",
+          "0001991340-25-000003,46266C105,IQVIA HLDGS INC COM,18994,100,SH,"
+        ]
+      },
+      "co_managers_csv": {
+        "purpose": "(기관)-[CO_MANAGES]-(기관) 엣지. OTHERMANAGER → 같은 accession filing manager 와 연결",
+        "schema": "accession_number, filing_manager, other_manager_cik, other_manager_name, other_form13f_filenumber",
+        "rows_data": 4358,
+        "sample_rows": [
+          "0001881567-25-000009,Clear Street Group Inc.,0001983408,Clear Street Derivatives LLC,028-24486",
+          "0001881567-25-000009,Clear Street Group Inc.,0001708828,CLEAR STREET LLC,028-21450"
+        ]
+      },
+      "top_issuers_csv": {
+        "purpose": "CUSIP별 보유 기관 수 내림차순 — 10-K 수집 대상 선정용",
+        "schema": "cusip, name_of_issuer, n_filer_managers, total_value_usd_thousands",
+        "rows_data": 33691,
+        "top10": [
+          "594918104 MICROSOFT CORP COM — 6139 managers",
+          "037833100 APPLE INC COM — 5862",
+          "023135106 AMAZON COM INC COM — 5814",
+          "67066G104 NVIDIA CORPORATION COM — 5568",
+          "02079K305 ALPHABET INC CAP STK CL A — 5281",
+          "30303M102 META PLATFORMS INC CL A — 5055",
+          "46625H100 JPMORGAN CHASE & CO. COM — 4903",
+          "02079K107 ALPHABET INC CAP STK CL C — 4769",
+          "084670702 BERKSHIRE HATHAWAY INC DEL CL B NEW — 4754",
+          "78462F103 SPDR S&P 500 ETF TRUST — 4463"
+        ]
+      }
+    },
+    {
+      "name": "tenk_risk.jsonl",
+      "type": "검색 코퍼스 (10-K Item 1A Risk Factors — RAG 패널 대조군)",
+      "source": "SEC EDGAR data.sec.gov/submissions/CIK{10}.json → 최신 10-K 1차 문서 HTML → Item 1A(Risk Factors) 본문 추출",
+      "collector_script": "collect_10k.py (재현 가능)",
+      "selection": "top_issuers.csv 상위 55개 발행사 → 13F 발행사명 정규화 매칭 company_tickers.json title → CIK → 최신 10-K",
+      "mapping_result": "46/55 수집 성공. 미매핑 9건 = (ETF/펀드 6: SPDR·iShares·Invesco QQQ·Vanguard·SPDR Gold — 10-K 미발행 정상) + (외국발행사 1: TSMC, 20-F 발행) + (CIK 중복 2: Alphabet CL C·Vanguard TSM — 동일사 이미 수집) + (이름매칭 실패 1: GE AEROSPACE COM NEW)",
+      "mapping_success_rate": "비-ETF·비-중복 실질 후보 47개 중 46개 = 약 98% (이름매칭 진성 실패는 GE Aerospace 1건)",
+      "total_docs": 46,
+      "unique_cik": 46,
+      "schema": "{doc_id, cik, ticker, company, cusip, issuer_13f_name, fiscal_year, accession, source_url, risk_text, char_count, collected_at}",
+      "char_count_min": 21771,
+      "char_count_median": 119999,
+      "char_count_max": 298621,
+      "char_count_avg": 106764,
+      "fiscal_years": ["2025", "2026"],
+      "risk_text_cap": "문서당 120,000자 상한 (Meta/Palantir 등 초장문 절단). 검색 코퍼스로 충분한 본문 확보",
+      "bytes": 4504429
+    }
+  ],
+  "trap_notes": [
+    "함정1 (SEC User-Agent 필수): SEC.gov 모든 요청에 -A 'aiceo-4th-training-lecture noreply@example.com' 헤더 미설정 시 403/봇차단. ZIP·submissions JSON·10-K HTML 전부 해당. company_tickers.json 만 무인증 통과되나 동일 헤더 사용.",
+    "함정2 (ZIP 내부 OTHERMANAGER2): 스펙은 6 TSV 명시했으나 실제 ZIP 에 OTHERMANAGER2.tsv(3,760행)가 추가로 존재(총 9파일). 추정 파일명 금지 원칙대로 zipfile.namelist() 실측으로 확인. 그래프 가공에는 OTHERMANAGER.tsv 만 사용(스펙 준수), OTHERMANAGER2 는 보존만.",
+    "함정3 (CUSIP→CIK 직접매핑 불가): 13F INFOTABLE 은 CUSIP 만 제공, SEC 공개 무료 소스에 CUSIP↔CIK 매핑표 없음(상용 DB 필요). 우회: 13F NAMEOFISSUER('MICROSOFT CORP COM')를 접미어 정규식(COM/CL A/CORP/INC...)으로 정규화 후 company_tickers.json title 과 이름매칭. 단일토큰 브랜드(MICROSOFT/NVIDIA)는 prefix 매칭, 정규화 한계분(ELI LILLY/DISNEY/BERKSHIRE/EXXON/COSTCO/MCDONALDS)은 수동 ticker 별칭 7건. 진성 매칭실패 1/47 (GE AEROSPACE COM NEW — 'GE' 정규화 후 title 불일치). 강의 시연엔 영향 없음(상위 46개 확보).",
+    "함정4 (10-K iXBRL 인라인 단어분절): 최신 10-K 는 iXBRL 인라인 형식이라 평문화 시 헤딩이 'ITEM 1A. RIS K FACTORS'처럼 단어 중간에 공백이 끼고 &#160;(nbsp) 엔티티가 섞임. (a) html.unescape 적용, (b) 헤딩 토큰을 글자-사이-공백 허용 정규식(_loose)으로, (c) 목차(TOC)/교차참조 문장 vs 본문을 점수화(다음 종료헤딩까지 거리 최대 + 교차참조 감점)해 본문 시작 선택. 초기 단순 regex 는 MSFT/Exxon/Costco 등 'risk-too-short(2)' 로 실패 → 수정 후 복구.",
+    "함정5 (Item 1A 라벨 없는 본문 — McDonald's): MCD 10-K 는 본문 헤딩이 'RISK FACTORS Cautionary Statement...' 로 'Item 1A' 라벨 자체가 없음(문서 내 'Item 1A'는 TOC 1회뿐). 폴백: 대문자 'RISK FACTORS' + 정형 도입어(Cautionary/Our business/...) 패턴으로 별도 처리. 1개 파일 전용 엣지케이스.",
+    "함정6 (5-에이전트 병렬쓰기 충돌): 동일 업무를 5개 에이전트가 같은 디렉토리에 독립 수행 → managers.csv/holdings.csv/top_issuers.csv 등을 서로 덮어씀(타임스탬프 경쟁). 다른 에이전트의 collect_13f_graph.py 가 더 풍부한 스키마(holdings 11컬럼)로 덮어쓴 것을 관측. 본 에이전트는 자기 build_graph.py 를 최종 재실행해 보고 수치와 산출 스키마를 자기일관(self-consistent)하게 맞춤. 수렴도 측정은 설계상 의도된 것 — 노드/엣지 총량(10,422 manager / 3.27M holding / 33,691 issuer)은 13F 원천이 동일해 에이전트 무관 동일해야 정상.",
+    "함정7 (JPM/HD 본문 시작 미세오차): 점수화 본문선택이 JPM·HD 에서 진짜 시작 직전의 교차참조 변형 문장에 매칭돼 ~수백자 앞에서 시작(중간문장 시작). Risk Factors 본문 전체는 포함되어 검색 코퍼스로는 무해. 정밀 추출 필요 시 회사별 헤딩 사전 필요 — 강의 시연 범위 밖이라 미보정 명시."
+  ],
+  "graphrag_feasibility": {
+    "verdict": "성립 (강함). '기관 공동보유 멀티홉' 질의 가능",
+    "nodes": "기관(manager) 노드 10,422개(distinct CIK 9,859) + 발행사(issuer/CUSIP) 노드 33,691개",
+    "edges": "OWNS 엣지 3,267,091개(13F 보유) + CO_MANAGES 엣지 4,358개(공동운용)",
+    "density_evidence": "MICROSOFT 6,139개 기관 동시보유 / APPLE 5,862 / NVIDIA 5,568 — 상위 30개 발행사 모두 3,400+ 기관이 보유. 임의 두 대형주는 수천 개 공통 보유기관을 가짐 → '기관 A가 보유한 종목을 함께 보유한 다른 기관' 2~3홉 질의가 풍부한 결과 반환",
+    "demo_query_examples": [
+      "Q1(2홉): 'Microsoft를 보유한 기관들이 공통으로 많이 보유한 다른 종목 top5' — OWNS 역방향→정방향 집계",
+      "Q2(3홉): 'Berkshire Hathaway와 같은 종목을 가장 많이 겹쳐 보유한 기관, 그 기관이 추가로 보유한 종목' — manager↔issuer 왕복",
+      "Q3(CO_MANAGES): 'Clear Street Group과 공동운용 관계인 기관들의 합산 보유 포트폴리오'",
+      "Q4(GraphRAG vs RAG 대조): 'Microsoft 리스크 요인' → RAG는 tenk_risk.jsonl(MSFT) 단일문서 검색 / GraphRAG는 보유기관망+10-K 결합 — 동일 질문 두 방식 답변 비교 시연"
+    ],
+    "rag_panel": "tenk_risk.jsonl 46개 발행사 10-K Risk Factors(평균 10.7만자)는 GraphRAG 대조군. 그래프 종목노드(CUSIP)와 cusip 필드로 조인 가능 — 그래프 탐색 결과를 텍스트 근거로 보강하는 GraphRAG 파이프라인 시연 데이터 완비"
+  },
+  "artifacts_kept": {
+    "form13f_2025q3.zip": "원본 86MB ZIP (재추출용 보존)",
+    "13f/": "압축해제 TSV 9종 (343MB, 그래프 원천)",
+    "company_tickers.json": "SEC 티커-CIK 매핑 (10-K CIK 해석용)",
+    "managers.csv / holdings.csv / co_managers.csv / top_issuers.csv": "GraphRAG 정규화 가공물 4종",
+    "tenk_risk.jsonl": "10-K Risk Factors 46건 (RAG 대조 코퍼스)",
+    "collect_13f.py": "13F ZIP 다운로드+압축해제 스크립트 (재현용)",
+    "build_graph.py": "13F TSV → 그래프 4종 생성 스크립트 (재현용, 결정적)",
+    "collect_10k.py": "top_issuers → 10-K Risk Factors 추출 스크립트 (재현용)"
+  },
+  "data_period": "13F: 2025 Q3 (보고기준일 2025-09-30, 제출 2025-09~11) / 10-K: 각 사 최신 회계연도(FY2025~2026 혼재)",
+  "git_tracking": "데이터 본체(zip/tsv/csv/jsonl)는 대용량·제3자 → 다른 도메인과 동형으로 .gitignore 대상 권장. 단 SEC 데이터는 US 퍼블릭도메인이라 라이선스 제약은 없음. 스크립트(collect_*.py/build_graph.py)와 본 _collect_meta.json 은 추적 권장"
+}
