@@ -15,6 +15,9 @@ specs/
 *.local.md
 .claude/scratchpad.md
 
+# Playwright MCP 세션 캡처 (매 세션마다 달라지는 임시 로그·DOM 스냅샷)
+.playwright-mcp/
+
 # 프로젝트 운영 컨텍스트 (vault 경로·강의 일정·수강생 맥락 — 퍼블릭 제외)
 CLAUDE.md
 
