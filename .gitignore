@@ -14,6 +14,14 @@ specs/
 .claude/*.local.md
 *.local.md
 .claude/scratchpad.md
+.claude/settings.json
+.claude/settings.local.json
+
+# teacher 하네스 로컬 실행 요소 (공개 대상은 commands/skills/agents 뿐)
+# — hook 스크립트·output style은 디바이스 로컬 트리거라 퍼블릭 제외.
+#   복사 가이드는 skills/teacher/SKILL.md 의 이식 절차 참조.
+.claude/hooks/
+.claude/output-styles/
 
 # Playwright MCP 세션 캡처 (매 세션마다 달라지는 임시 로그·DOM 스냅샷)
 .playwright-mcp/
